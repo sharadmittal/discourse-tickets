@@ -64,7 +64,8 @@ DiscourseEvent.on(:post_created) do |post, opts, user|
     guardian = Guardian.new(user)
     guardian.ensure_can_create_ticket!(topic)
 
-    topic.custom_fields['is_ticket'] = post.via_email || ActiveModel::Type::Boolean.new.cast(opts[:is_ticket])
+    topic.custom_fields['is_ticket'] = true
+	    #post.via_email || ActiveModel::Type::Boolean.new.cast(opts[:is_ticket])
     topic.save!
   end
 end
