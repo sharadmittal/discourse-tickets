@@ -56,16 +56,3 @@ PostRevisor.track_topic_field(:allowed_users) do |tc, allowed_users|
     tc.topic.topic_allowed_users.build(user_id: user.id)
   end
 end
-
-DiscourseEvent.on(:post_created) do |post, opts, user|
-  if post.is_first_post? && opts[:is_ticket]
-    topic = Topic.find(post.topic_id)
-
-    #guardian = Guardian.new(user)
-    #guardian.ensure_can_create_ticket!(topic)
-
-    topic.custom_fields['is_ticket'] = true
-	    #post.via_email || ActiveModel::Type::Boolean.new.cast(opts[:is_ticket])
-    topic.save!
-  end
-end
