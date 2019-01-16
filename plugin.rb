@@ -68,6 +68,23 @@ after_initialize do
   	    #post.via_email || ActiveModel::Type::Boolean.new.cast(opts[:is_ticket])
       topic.save!
     end
+
+    # Lets mark the ticket open
+    unless post.via_email
+      tag = Tag.find_by(name: "open")
+      topic.tags ||= []
+      unless topic.tags.pluck(:id).include?(tag.id)
+        topic.tags << tag
+
+        # remove the resolved tag.
+        # Todo : make sure no other tag types are possible for Status
+        resolved-tag = Tag.find_by(name: "resolved")
+        topic.tags.remove(resolved-tag)
+        topic.save
+
+        post.publish_change_to_clients!(:revised, reload_topic: true)
+      end
+    end
   end
 
   add_to_serializer(:site, :ticket_tags) { ::Site.ticket_tags }
