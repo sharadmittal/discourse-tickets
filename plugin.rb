@@ -70,7 +70,7 @@ after_initialize do
     end
 
     # Lets mark the ticket open
-    unless post.via_email
+    #unless post.via_email
       tag = Tag.find {|e| /open/ =~ e}
       topic.tags ||= []
       unless topic.tags.pluck(:id).include?(tag.id)
@@ -84,7 +84,7 @@ after_initialize do
 
         post.publish_change_to_clients!(:revised, reload_topic: true)
       end
-    end
+    #end
   end
 
   add_to_serializer(:site, :ticket_tags) { ::Site.ticket_tags }
