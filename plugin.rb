@@ -80,7 +80,7 @@ after_initialize do
         # Todo : make sure no other tag types are possible for Status
         resolved-tag = Tag.find {|e| /resolved/ =~ e}
         topic.tags.remove(resolved-tag)
-        topic.save
+        topic.save!
 
         post.publish_change_to_clients!(:revised, reload_topic: true)
       end
