@@ -58,8 +58,9 @@ after_initialize do
   end
 
   DiscourseEvent.on(:post_created) do |post, opts, user|
+    topic = Topic.find(post.topic_id)
     if post.is_first_post?
-      topic = Topic.find(post.topic_id)
+      #topic = Topic.find(post.topic_id)
 
       #guardian = Guardian.new(user)
       #guardian.ensure_can_create_ticket!(topic)
