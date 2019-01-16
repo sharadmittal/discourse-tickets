@@ -71,14 +71,14 @@ after_initialize do
 
     # Lets mark the ticket open
     unless post.via_email
-      tag = Tag.find_by(name: "open")
+      tag = Tag.find {|e| /open/ =~ e}
       topic.tags ||= []
       unless topic.tags.pluck(:id).include?(tag.id)
         topic.tags << tag
 
         # remove the resolved tag.
         # Todo : make sure no other tag types are possible for Status
-        resolved-tag = Tag.find_by(name: "resolved")
+        resolved-tag = Tag.find {|e| /resolved/ =~ e}
         topic.tags.remove(resolved-tag)
         topic.save
 
