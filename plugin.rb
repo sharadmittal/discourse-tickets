@@ -83,8 +83,6 @@ after_initialize do
       unless topic.tags.pluck(:id).include?(open_tag.id)
         topic.tags << open_tag
         Rails.logger.error ("Added open tag")
-        # remove the resolved tag.
-        # Todo : make sure no other tag types are possible for Status
       end
       topic.save!
       post.publish_change_to_clients!(:revised, reload_topic: true)
