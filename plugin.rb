@@ -74,12 +74,14 @@ after_initialize do
     #unless post.via_email
       tag = Tag.find {|e| /open/ =~ e}
       topic.tags ||= []
+      Rails.logger.debug (tag)
       unless topic.tags.pluck(:id).include?(tag.id)
         topic.tags << tag
 
         # remove the resolved tag.
         # Todo : make sure no other tag types are possible for Status
         resolved-tag = Tag.find {|e| /resolved/ =~ e}
+        Rails.logger.debug (resolved-tag)
         topic.tags.remove(resolved-tag)
         topic.save!
 
