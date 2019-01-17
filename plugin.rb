@@ -66,28 +66,29 @@ after_initialize do
       #guardian.ensure_can_create_ticket!(topic)
 
       topic.custom_fields['is_ticket'] = true
-  	    #post.via_email || ActiveModel::Type::Boolean.new.cast(opts[:is_ticket])
+      # The new ticket will be marked open in below unless loop
       topic.save!
     end
 
     # Lets mark the ticket open
-    #unless post.via_email
-      tag = Tag.find {|e| /open/ =~ e}
-      topic.tags ||= []
-      Rails.logger.debug (tag)
-      unless topic.tags.pluck(:id).include?(tag.id)
-        topic.tags << tag
-
+    unless !post.via_email
+      # Remove the resolved tag
+      topic_tags = topic.tags
+      resolved_tag = topic_tags.find_by_name("resolved")
+      if resolved_tag
+        topic_tags.delete(resolved_tag)
+        Rails.logger.error ("Deleting resolved tag")
+      end
+      open_tag = Tag.find_by_name("open")
+      unless topic.tags.pluck(:id).include?(open_tag.id)
+        topic.tags << open_tag
+        Rails.logger.error ("Added open tag")
         # remove the resolved tag.
         # Todo : make sure no other tag types are possible for Status
-        resolved-tag = Tag.find {|e| /resolved/ =~ e}
-        Rails.logger.debug (resolved-tag)
-        topic.tags.remove(resolved-tag)
-        topic.save!
-
-        post.publish_change_to_clients!(:revised, reload_topic: true)
       end
-    #end
+      topic.save!
+      post.publish_change_to_clients!(:revised, reload_topic: true)
+    end
   end
 
   add_to_serializer(:site, :ticket_tags) { ::Site.ticket_tags }
