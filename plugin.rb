@@ -57,6 +57,47 @@ after_initialize do
     prepend DiscourseTaggingExtension
   end
 
+  module ReceiverUserNameExtension
+    def find_or_create_user(email, display_name, raise_on_failed_create: false)
+      user = nil
+
+      User.transaction do
+        user = User.find_by_email(email)
+
+        if user.nil? && SiteSetting.enable_staged_users
+          raise EmailNotAllowed unless EmailValidator.allowed?(email)
+
+          if (display_name)
+            username = display_name[0] << rand(1000000).to_s
+          else
+            username = rand(1000000).to_s
+          end
+          Rails.logger.error ("Suggested username = #{username}")
+          #username = UserNameSuggester.sanitize_username(display_name) if display_name.present?
+          begin
+            user = User.create!(
+              email: email,
+              username: UserNameSuggester.suggest(username.presence || email),
+              name: display_name.presence || User.suggest_name(email),
+              staged: true
+            )
+            @staged_users << user
+          rescue PG::UniqueViolation, ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid
+            raise if raise_on_failed_create
+            user = nil
+          end
+        end
+      end
+
+      user
+    end
+  end
+
+  require_dependency 'email/receiver'
+  class Email::Receiver
+    prepend ReceiverUserNameExtension
+  end
+
   DiscourseEvent.on(:post_created) do |post, opts, user|
     topic = Topic.find(post.topic_id)
     if post.is_first_post?
