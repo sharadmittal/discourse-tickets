@@ -98,6 +98,33 @@ after_initialize do
     prepend ReceiverUserNameExtension
   end
 
+  require_dependency 'user_notifications'
+  module UserNotificationsHelperExtension
+    def show_username_on_post(post)
+      return false
+    end
+  end
+
+  class UserNotifications::UserNotificationRenderer
+    prepend UserNotificationsHelperExtension
+
+    #prepend_view_path File.expand_path("../custom_views", __FILE__)
+    #def layout
+    #  File.expand_path('../app/views/email/revisedpost.html.erb', __FILE__)
+    #end
+  end
+
+  module ::UserNotificationsOverride
+    def send_notification_email(opts)
+        Rails.configuration.paths["app/views"].unshift(File.expand_path("../templates", __FILE__))
+        super(opts)
+    end
+  end
+
+  class ::UserNotifications
+    prepend ::UserNotificationsOverride
+  end
+
   DiscourseEvent.on(:post_created) do |post, opts, user|
     topic = Topic.find(post.topic_id)
     if post.is_first_post?
@@ -107,7 +134,7 @@ after_initialize do
       #guardian.ensure_can_create_ticket!(topic)
 
       topic.custom_fields['is_ticket'] = true
-      # The new ticket will be marked open in below unless loop
+      # The new ticket will be marked open in below loop
       topic.save!
     end
 
