@@ -99,21 +99,28 @@ after_initialize do
   end
 
   require_dependency 'user_notifications'
-  module UserNotificationsHelperExtension
-    def show_username_on_post(post)
-      return false
-    end
-  end
 
-  class UserNotifications::UserNotificationRenderer
-    prepend UserNotificationsHelperExtension
+  # Commenting the code the override test code for email modification
+  # Now we are overriding the template itself - so can do much more and easily as well
+  #
+
+  #module UserNotificationsHelperExtension
+  #  def show_username_on_post(post)
+  #    return false
+  #  end
+  #end
+
+  #class UserNotifications::UserNotificationRenderer
+  #  prepend UserNotificationsHelperExtension
 
     #prepend_view_path File.expand_path("../custom_views", __FILE__)
     #def layout
     #  File.expand_path('../app/views/email/revisedpost.html.erb', __FILE__)
     #end
-  end
+  #end
 
+  # Override the email template location
+  #
   module ::UserNotificationsOverride
     def send_notification_email(opts)
         Rails.configuration.paths["app/views"].unshift(File.expand_path("../templates", __FILE__))
