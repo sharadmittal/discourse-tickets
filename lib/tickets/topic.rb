@@ -1,6 +1,9 @@
 Topic.register_custom_field_type('is_ticket', :boolean)
 TopicList.preloaded_custom_fields << 'is_ticket' if TopicList.respond_to? :preloaded_custom_fields
 
+Topic.register_custom_field_type('order_id', :string)
+TopicList.preloaded_custom_fields << 'order_id' if TopicList.respond_to? :preloaded_custom_fields
+
 require_dependency 'topic'
 class Topic
   def is_ticket
@@ -10,23 +13,39 @@ class Topic
       false
     end
   end
+
+  def order_id
+    if custom_fields['order_id']
+      custom_fields['order_id']
+    else
+      ""
+    end
+  end
 end
 
 require_dependency 'topic_view_serializer'
 class TopicViewSerializer
-  attributes :is_ticket
+  attributes :is_ticket, :order_id
 
   def is_ticket
     object.topic.is_ticket
+  end
+
+  def order_id
+    object.topic.order_id
   end
 end
 
 require_dependency 'topic_list_item_serializer'
 class TopicListItemSerializer
-  attributes :is_ticket
+  attributes :is_ticket, :order_id
 
   def is_ticket
     object.is_ticket
+  end
+
+  def order_id
+    object.order_id
   end
 end
 
