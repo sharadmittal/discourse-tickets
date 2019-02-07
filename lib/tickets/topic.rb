@@ -4,6 +4,12 @@ TopicList.preloaded_custom_fields << 'is_ticket' if TopicList.respond_to? :prelo
 Topic.register_custom_field_type('order_id', :string)
 TopicList.preloaded_custom_fields << 'order_id' if TopicList.respond_to? :preloaded_custom_fields
 
+Topic.register_custom_field_type('locked_at', :integer)
+TopicList.preloaded_custom_fields << 'locked_at' if TopicList.respond_to? :preloaded_custom_fields
+
+Topic.register_custom_field_type('locked_by', :string)
+TopicList.preloaded_custom_fields << 'locked_by' if TopicList.respond_to? :preloaded_custom_fields
+
 require_dependency 'topic'
 class Topic
   def is_ticket
@@ -17,6 +23,22 @@ class Topic
   def order_id
     if custom_fields['order_id']
       custom_fields['order_id']
+    else
+      ""
+    end
+  end
+
+  def locked_at
+    if custom_fields['locked_at']
+      ActiveModel::Type::Integer.new.cast(custom_fields['locked_at'])
+    else
+      0
+    end
+  end
+
+  def locked_by
+    if custom_fields['locked_by']
+      ActiveModel::Type::String.new.cast(custom_fields['locked_by'])
     else
       ""
     end
@@ -38,7 +60,7 @@ end
 
 require_dependency 'topic_list_item_serializer'
 class TopicListItemSerializer
-  attributes :is_ticket, :order_id
+  attributes :is_ticket, :order_id, :locked_at, :locked_by
 
   def is_ticket
     object.is_ticket
@@ -46,6 +68,14 @@ class TopicListItemSerializer
 
   def order_id
     object.order_id
+  end
+
+  def locked_at
+    object.locked_at
+  end
+
+  def locked_by
+    object.locked_by
   end
 end
 
